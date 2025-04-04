@@ -9,7 +9,7 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background: linear-gradient(135deg, #407f6e, #76709f);
+    background: linear-gradient(135deg, #407f6e, #76709f); /* Default gradient */
     color: #333;
     position: relative;
 }
@@ -17,6 +17,17 @@ body {
 body.dark-mode {
     background: #121212;
     color: #f9f9f9;
+}
+
+body.day-mode {
+    background: linear-gradient(135deg, #87cefa, #f0e68c); /* light sky blue to khaki */
+    color: #333;
+}
+
+
+body.night-mode {
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364); /* Dark night shades */
+    color: #f0f0f0;
 }
 
 #toggle-theme {
@@ -37,7 +48,6 @@ body.dark-mode {
     transform: scale(1.1);
 }
 
-
 .card {
     width: 90%;
     max-width: 1000px;
@@ -50,8 +60,8 @@ body.dark-mode {
     transition: background 0.5s ease;
 }
 
-
-body.dark-mode .card {
+body.dark-mode .card,
+body.night-mode .card {
     background: rgba(40, 40, 40, 0.9);
 }
 
@@ -74,7 +84,8 @@ body.dark-mode .card {
     font-size: 18px;
 }
 
-body.dark-mode .search input {
+body.dark-mode .search input,
+body.night-mode .search input {
     background: #333;
     color: #f9f9f9;
 }
@@ -98,13 +109,11 @@ body.dark-mode .search input {
     width: 16px;
 }
 
-
 .weatherIcon {
     width: 120px;
     margin-top: 30px;
     padding: 10px;
 }
-
 
 .weather h1 {
     font-size: 50px;
@@ -116,7 +125,6 @@ body.dark-mode .search input {
     font-weight: 400;
     margin-top: -10px;
 }
-
 
 .details {
     display: flex;
@@ -155,7 +163,6 @@ body.dark-mode .search input {
     display: none;
 }
 
-
 .history-container {
     width: 90%;
     max-width: 1000px;
@@ -167,8 +174,8 @@ body.dark-mode .search input {
     transition: background 0.5s ease;
 }
 
-
-body.dark-mode .history-container {
+body.dark-mode .history-container,
+body.night-mode .history-container {
     background: rgba(40, 40, 40, 0.9);
 }
 
@@ -178,12 +185,11 @@ body.dark-mode .history-container {
     margin-bottom: 20px;
 }
 
-
 #history-list {
     list-style: none;
     padding: 0;
     max-height: 200px;
-    overflow-y: auto; 
+    overflow-y: auto;
 }
 
 #history-list li {
@@ -199,10 +205,10 @@ body.dark-mode .history-container {
     background: #ddd;
 }
 
-body.dark-mode #history-list li:hover {
+body.dark-mode #history-list li:hover,
+body.night-mode #history-list li:hover {
     background: #444;
 }
-
 
 #clear-history-btn {
     display: block;
@@ -220,24 +226,7 @@ body.dark-mode #history-list li:hover {
     background-color: #cc0000;
 }
 
-
-#toggle-mode-btn {
-    background: #4a90e2;
-    border: none;
-    padding: 0.8rem 1rem;
-    border-radius: 12px;
-    color: white;
-    cursor: pointer;
-    width: 100%;
-    margin-top: 1rem;
-    transition: background 0.3s ease;
-}
-
-#toggle-mode-btn:hover {
-    background: #357abd;
-}
-
-
+/* Mobile responsiveness */
 @media (max-width: 768px) {
     body {
         padding: 10px;
@@ -295,7 +284,7 @@ body.dark-mode #history-list li:hover {
         max-height: 150px;
     }
 
-    #toggle-mode-btn {
+    #toggle-theme {
         padding: 0.6rem 1rem;
     }
 }
