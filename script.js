@@ -7,6 +7,7 @@ const searchBtn = document.querySelector(".search button");
 const weatherIcon = document.querySelector(".weather-Icon");
 const historyList = document.getElementById("history-list");
 const clearHistoryBtn = document.getElementById("clear-history-btn");
+const historyContainer = document.querySelector(".history-container");
 const toggleThemeBtn = document.getElementById("toggle-theme");
 
 const weatherImages = {
@@ -33,10 +34,15 @@ async function setWeatherBackground(city, weatherMain) {
       document.body.style.backgroundImage = `url(${data.urls.full})`;
       document.body.style.backgroundSize = "cover";
       document.body.style.backgroundPosition = "center";
+      document.body.classList.add("has-bg-image");
+    } else {
+      document.body.style.backgroundImage = "";
+      document.body.classList.remove("has-bg-image");
     }
   } catch (error) {
     console.error("Failed to fetch Unsplash image", error);
-    document.body.style.backgroundImage = "url('fallback.jpg')";
+    document.body.style.backgroundImage = "";
+    document.body.classList.remove("has-bg-image");
   }
 }
 
@@ -65,17 +71,21 @@ function displayHistory() {
     historyList.appendChild(li);
   });
 
-  clearHistoryBtn.style.display = searchHistory.length > 0 ? "block" : "none";
+  const hasHistory = searchHistory.length > 0;
+  clearHistoryBtn.style.display = hasHistory ? "block" : "none";
+  historyContainer.style.display = hasHistory ? "block" : "none";
 }
 
 // 🔁 Update search history
 function updateSearchHistory(city) {
-  if (!searchHistory.includes(city)) {
-    searchHistory.push(city);
-    if (searchHistory.length > 5) searchHistory.shift();
-    localStorage.setItem("weatherHistory", JSON.stringify(searchHistory));
-    displayHistory();
+  const index = searchHistory.indexOf(city);
+  if (index !== -1) {
+    searchHistory.splice(index, 1);
   }
+  searchHistory.push(city);
+  if (searchHistory.length > 5) searchHistory.shift();
+  localStorage.setItem("weatherHistory", JSON.stringify(searchHistory));
+  displayHistory();
 }
 
 // 🌦️ Main weather fetch
@@ -87,7 +97,15 @@ async function checkWeather(city) {
 
   try {
     const response = await fetch(apiUrl + city + `&appid=${apikey}`);
-    if (!response.ok) throw new Error("Invalid city name!");
+    if (!response.ok) {
+      if (response.status === 404) {
+        throw new Error("City not found! Please check spelling.");
+      } else if (response.status === 401) {
+        throw new Error("Invalid API key configured.");
+      } else {
+        throw new Error("Failed to fetch weather data.");
+      }
+    }
 
     const data = await response.json();
 
@@ -96,7 +114,7 @@ async function checkWeather(city) {
     document.querySelector(".temp").innerHTML = Math.round(data.main.temp) + "°c";
     document.querySelector(".humidity").innerHTML = data.main.humidity + "%";
     document.querySelector(".wind").innerHTML = data.wind.speed + " km/h";
-    weatherIcon.src = weatherImages[data.weather[0].main] || "default.png";
+    weatherIcon.src = weatherImages[data.weather[0].main] || "clear.png";
 
     document.querySelector(".weather").style.display = "block";
     document.querySelector(".error").style.display = "none";
@@ -106,12 +124,12 @@ async function checkWeather(city) {
     // ⛅ Update background
     await setWeatherBackground(data.name, data.weather[0].main);
 
-    // ✅ Hide theme toggle after a valid search
-    toggleThemeBtn.style.display = "none";
-
   } catch (error) {
     document.querySelector(".error").style.display = "block";
+    document.querySelector(".error p").textContent = error.message || "Invalid city name!";
     document.querySelector(".weather").style.display = "none";
+    document.body.style.backgroundImage = "";
+    document.body.classList.remove("has-bg-image");
   }
 }
 
@@ -132,12 +150,20 @@ toggleThemeBtn.addEventListener("click", () => {
   } else {
     applyTimeBasedBackground();
   }
+  toggleThemeBtn.textContent = isDark ? "☀️ Light Mode" : "🌙 Dark Mode";
 });
 
-// 🔍 Search event
+// 🔍 Search events
 searchBtn.addEventListener("click", () => {
   checkWeather(searchBox.value);
   searchBox.value = "";
+});
+
+searchBox.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    checkWeather(searchBox.value);
+    searchBox.value = "";
+  }
 });
 
 // 🚮 Clear history button
@@ -158,15 +184,9 @@ window.addEventListener("load", () => {
   } else {
     applyTimeBasedBackground();
   }
+
+  const isDark = document.body.classList.contains("dark-mode");
+  toggleThemeBtn.textContent = isDark ? "☀️ Light Mode" : "🌙 Dark Mode";
 });
 
-// 📱 Toggle history (mobile support)
-const toggleHistoryBtn = document.getElementById("toggle-history-btn");
-const historyContainer = document.querySelector(".history-container");
-
-if (toggleHistoryBtn) {
-  toggleHistoryBtn.addEventListener("click", () => {
-    historyContainer.classList.toggle("show");
-  });
-}
-
+// Dead code for mobile history toggle button removed.
